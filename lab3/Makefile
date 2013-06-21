@@ -1,8 +1,8 @@
 %: %.o
-	ld -s -g -melf_i386 -o $@ $<
+	gcc -m32 -o $@ $<
 
 %.o: %.asm
-	nasm -f elf -g $<
+	nasm -f elf $<
 
 .PHONY: clean
 clean:
