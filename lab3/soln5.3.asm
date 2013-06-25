@@ -8,13 +8,14 @@ global      main                  ;standard gcc entry point
 main:                             ;tell linker entry point
     ; Compute the sum
     xor     eax, eax              ;initialise accumulator to zero
-    mov     ecx, count            ;count of numbers in the list
     mov     esi, nums             ;address of first number
+    mov     ecx, count            ;count of numbers in the list
 .loop:
     cmp     ecx, 0                ;are we done?
-    add     eax, [esi]            ;add next in list to total
-    jz      .done                 ;yes!
-    dec     ecx                   ;no, so subtract 1 from count
+    je      .done                 ;yes!
+
+    add     eax, [esi]            ;add next number in list to total
+    dec     ecx                   ;so subtract 1 from count
     add     esi, 4                ;advance to the next number in the list
     jmp     .loop                 ;go around again
 .done:
@@ -38,6 +39,8 @@ main:                             ;tell linker entry point
     int     0x80                  ;call kernel
 
 section     .data
+
+debug: db "ecx=%d, esi=%p", 0x0a, 0
 
 ; printf expects a null terminated format string as its first parameter
 fmt: db "Sum=%d, Average=%d", 0x0a, 0
