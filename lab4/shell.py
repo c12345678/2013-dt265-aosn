@@ -10,16 +10,23 @@ def parse(cmd):
   # Handy module already exits for splitting command input into tokens
   return shlex.split(cmd)
 
-def execute(argv):
+def execute(cmd, argv):
+  try:
+    os.execv(cmd, argv)
+  except OSError:
+    return
+
+def call(argv):
   pid = os.fork()
   if pid == 0:
     # Child process
-    for dir in os.getenv('PATH').split(':'):
-      try:
-        os.execv(dir + '/' + argv[0], argv)
-      except OSError:
-        # Keep trying each directory in path until we find it
-        continue
+    if '/' in cmd:
+      # Relative or absolute path specified
+      execute(argv[0], argv)
+    else:
+      for dir in os.getenv('PATH').split(':'):
+        # Keep trying each directory in PATH until we find it
+        execute(dir + '/' + argv[0], argv)
 
     # If we get here then execution has failed
     sys.stderr.write('Unrecognised command: ' + argv[0] + '\n')
@@ -32,9 +39,11 @@ def execute(argv):
 while True:
   try:
     cmd = raw_input(prompt)
+    if cmd.strip() == "":
+      continue
     if cmd.strip() == "exit":
       break
     argv = parse(cmd)
-    execute(argv)
+    call(argv)
   except EOFError:
     break
